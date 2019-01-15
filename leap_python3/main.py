@@ -11,6 +11,10 @@ DARKGREEN = (0,122,0)
 size = (750, 500)
 screen = pygame.display.set_mode(size)
 
+def scale(pygamescreen, leaprange): # takes two tuples
+	# xapp = (xleap - Leapstart)(apprange/leaprange) + appstart
+	# where leaprange = leapend - leapstart && apprange = append - appstart
+	scaledx = pygamescreen[0]
 class SampleListener(Leap.Listener):
     finger_names = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
     bone_names = ['Metacarpal', 'Proximal', 'Intermediate', 'Distal']
@@ -35,14 +39,14 @@ class SampleListener(Leap.Listener):
         tip = pointable.tip_position 
         tip = [tip[0], tip[1]] # x and y axes only
         while True:
-			pygame.draw.line(screen, WHITE, [10, 30], [10, 470], 5) # y axis
-			pygame.draw.line(screen, WHITE, [10, 470], [700, 470], 5) # x axis
-			s = 45 # number of sections
-			l = 15 # length (mm) of sections
-			y = 235 # y position
-			for f_region in np.arange(15, 15+(s*l), step=l): # frequency ranges
-				pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, y], 5)
-			pygame.display.flip()
+        	pygame.draw.line(screen, WHITE, [10, 30], [10, 470], 5) # y axis
+        	pygame.draw.line(screen, WHITE, [10, 470], [700, 470], 5) # x axis
+        	s = 45 # number of sections
+        	l = 15 # length (mm) of sections
+        	y = 235 # y position
+        	for f_region in np.arange(15, 15+(s*l), step=l): # frequency ranges
+        		pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, y], 5)
+        		pygame.display.flip()
 
 
 def main():
@@ -58,11 +62,11 @@ def main():
         while True:
             pass
     except KeyboardInterrupt:
-        controller.remove_listener(listener)
+    	pygame.quit()
+    	controller.remove_listener(listener)
     finally:
-        # Remove the sample listener when done
-        controller.remove_listener(listener)
-
+    	# Remove the sample listener when done
+    	controller.remove_listener(listener)
 
 if __name__ == "__main__":
     main()
