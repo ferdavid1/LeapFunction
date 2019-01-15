@@ -1,6 +1,15 @@
 import Leap
-tip = [0.0,0.0]
+import pygame
+import numpy as np
+pygame.init()
 
+BLACK = (0,0,0)
+WHITE = (255,255,255)
+DARKGREEN = (0,122,0)
+# BLUE = (0,0,255)
+
+size = (750, 500)
+screen = pygame.display.set_mode(size)
 
 class SampleListener(Leap.Listener):
     finger_names = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
@@ -23,10 +32,17 @@ class SampleListener(Leap.Listener):
         # Get the most recent frame and report some basic information
         frame = controller.frame()
         pointable = frame.pointables.frontmost
-        global tip
         tip = pointable.tip_position 
         tip = [tip[0], tip[1]] # x and y axes only
-
+        while True:
+			pygame.draw.line(screen, WHITE, [10, 30], [10, 470], 5) # y axis
+			pygame.draw.line(screen, WHITE, [10, 470], [700, 470], 5) # x axis
+			s = 45 # number of sections
+			l = 15 # length (mm) of sections
+			y = 235 # y position
+			for f_region in np.arange(15, 15+(s*l), step=l): # frequency ranges
+				pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, y], 5)
+			pygame.display.flip()
 
 
 def main():
