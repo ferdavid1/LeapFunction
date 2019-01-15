@@ -15,7 +15,7 @@ while True:
 	s = 50 # number of sections
 	l = 15 # length (mm) of sections
 	first = 235 # initial 
-	# for f_region in range(first, first+(s*l)): # frequency ranges
-	# 	pygame.draw.line(screen, DARKGREEN, [10, f_region], [f_region+l, first], 3)
-	pygame.draw.line(screen, DARKGREEN, [13, 235], [10+15, first], 5)
+	for f_region in range(10, 10+(s*l)): # frequency ranges
+		pygame.draw.line(screen, DARKGREEN, [f_region+3, first], [f_region+3+l, first], 5)
+	# pygame.draw.line(screen, DARKGREEN, [13, 235], [13+15, first], 5)
 	pygame.display.flip()
