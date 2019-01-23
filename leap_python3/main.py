@@ -10,11 +10,17 @@ DARKGREEN = (0,122,0)
 
 size = (750, 500)
 screen = pygame.display.set_mode(size)
+scaled = [0.0, 0.0]
 
-def scale(pygamescreen, leaprange): # takes two tuples
-	# xapp = (xleap - Leapstart)(apprange/leaprange) + appstart
-	# where leaprange = leapend - leapstart && apprange = append - appstart
-	scaledx = pygamescreen[0]
+def scale(leapcoor): # takes the current leap coordinates 
+	# xapp = (xleap - xleapstart)(xapprange/xleaprange) + xappstart
+	# where xleaprange = xleapend - xleapstart && xapprange = xappend - xappstart
+	xleaprange = float(180*2) # 180 - - 180 = 180 + 180 = 180*2 
+	scaledx = (leapcoor[0] + 180.0)*(750.0/xleaprange) # + 0 
+	yleaprange = 463.0
+	scaledy = (leapcoor[1])*(500.0/yleaprange) # + 0
+	return [scaledx, scaledy]
+
 class SampleListener(Leap.Listener):
     finger_names = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
     bone_names = ['Metacarpal', 'Proximal', 'Intermediate', 'Distal']
@@ -37,16 +43,11 @@ class SampleListener(Leap.Listener):
         frame = controller.frame()
         pointable = frame.pointables.frontmost
         tip = pointable.tip_position 
-        tip = [tip[0], tip[1]] # x and y axes only
-        while True:
-        	pygame.draw.line(screen, WHITE, [10, 30], [10, 470], 5) # y axis
-        	pygame.draw.line(screen, WHITE, [10, 470], [700, 470], 5) # x axis
-        	s = 45 # number of sections
-        	l = 15 # length (mm) of sections
-        	y = 235 # y position
-        	for f_region in np.arange(15, 15+(s*l), step=l): # frequency ranges
-        		pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, y], 5)
-        		pygame.display.flip()
+        global scaled 
+        global direction
+        scaled = scale(tip)
+        direction = pointable.direction
+        print(tip, scaled)
 
 
 def main():
@@ -59,8 +60,22 @@ def main():
     # Keep this process running until Enter is pressed
     print("Press Enter to quit...")
     try:
+        pygame.draw.line(screen, WHITE, [10, 30], [10, 470], 5) # y axis
+        pygame.draw.line(screen, WHITE, [10, 470], [700, 470], 5) # x axis
+        s = 45 # number of sections
+        l = 15 # length (mm) of sections
+        y = 235 # y position
+        for f_region in np.arange(15, 15+(s*l), step=l): # frequency ranges
+        	pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, y], 5)
+        	pygame.display.flip()
         while True:
-            pass
+	        for f_region in np.arange(15, 15+(s*l), step=l): # frequency ranges
+	        	if f_region+l-5 > scaled[0] > f_region:
+	        		print(direction)
+		        	pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, y+scaled[1]], 5)
+		        	pygame.display.flip()
+		        else: 
+		        	pass
     except KeyboardInterrupt:
     	pygame.quit()
     	controller.remove_listener(listener)
