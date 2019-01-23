@@ -44,9 +44,7 @@ class SampleListener(Leap.Listener):
         pointable = frame.pointables.frontmost
         tip = pointable.tip_position 
         global scaled 
-        global direction
         scaled = scale(tip)
-        direction = pointable.direction
         print(tip, scaled)
 
 
@@ -65,14 +63,17 @@ def main():
         s = 45 # number of sections
         l = 15 # length (mm) of sections
         y = 235 # y position
-        for f_region in np.arange(15, 15+(s*l), step=l): # frequency ranges
+        bands = np.arange(15, 15+(s*l), step=l)
+        for f_region in bands: # frequency ranges
         	pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, y], 5)
         	pygame.display.flip()
         while True:
-	        for f_region in np.arange(15, 15+(s*l), step=l): # frequency ranges
+	        for f_region in bands: # frequency ranges
 	        	if f_region+l-5 > scaled[0] > f_region:
-	        		print(direction)
-		        	pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, y+scaled[1]], 5)
+	        		#!!!!!!!!!!!
+	        		# fix so that the following lines are not like a bar graph, just changes the location of the small line 
+	        		screen.fill(pygame.Color("black")) # clear the screen
+		        	pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, y-scaled[1]], 5) # changed "y+scaled" to "y-scaled" because y increases in the -y direction for some reason
 		        	pygame.display.flip()
 		        else: 
 		        	pass
