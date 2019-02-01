@@ -73,40 +73,37 @@ def main():
     controller.add_listener(listener)
     # Keep this process running until Enter is pressed
     def drawgame():
-    	t = True
     	print("Press the first button to start.\n")
-    	while t == True:
-    		try:
-	    		val = serialArduino.readline()[:2].decode("cp437")
-	    		# print("Value: ", val)
-	    		audioval = np.array()
-	    		if val == '10': # replace with pi gpio button input read
-		    		s = 45 # number of sections
-		    		l = 15 # length (mm) of sections
-		    		y = 235 # y position
-		    		bands = np.arange(15, 15+(s*l), step=l)
-		    		for x in range(10): # how many times you do this. modulate w a pot
-			    		pygame.draw.line(screen, WHITE, [10, 30], [10, 470], 5) # y axis
-			    		pygame.draw.line(screen, WHITE, [10, 470], [700, 470], 5) # x axis
-			    		for f_region in bands: # frequency ranges
-				    		if f_region+l-5 > scaled[0] > f_region:
-					    		pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, 470-scaled[1]], 5) # changed "y+scaled" to "y-scaled" because y increases in the -y direction for some reason
-					    		pygame.display.flip()
-					    		audioval += scaled[1] # these are the raw interpreted audio values we will connect
-					    		time.sleep(0.02)
-					    	else:
-					    		pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, y], 5)
-					    		pygame.display.flip()
-			    		screen.fill(pygame.Color("black")) # clear the screen
-		    		print(audioval)
-		    		play(audioval)
-		    		drawgame()
-	    	except KeyboardInterrupt:
-	    		t = False
-	    		pygame.quit()
-	    		controller.remove_listener(listener)
-	    		
+    	val = serialArduino.readline()[:2].decode("cp437")
+		# print("Value: ", val)
+		audioval = np.array([])
+		if val == '10': # replace with pi gpio button input read
+    		s = 45 # number of sections
+    		l = 15 # length (mm) of sections
+    		y = 235 # y position
+    		bands = np.arange(15, 15+(s*l), step=l)
+    		for x in range(10): # how many times you do this. modulate w a pot
+	    		pygame.draw.line(screen, WHITE, [10, 30], [10, 470], 5) # y axis
+	    		pygame.draw.line(screen, WHITE, [10, 470], [700, 470], 5) # x axis
+	    		for f_region in bands: # frequency ranges
+		    		if f_region+l-5 > scaled[0] > f_region:
+			    		pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, 470-scaled[1]], 5) # changed "y+scaled" to "y-scaled" because y increases in the -y direction for some reason
+			    		pygame.display.flip()
+			    		np.append(audioval, scaled[1]) # these are the raw interpreted audio values we will connect
+			    		time.sleep(0.02)
+			    	else:
+			    		pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, y], 5)
+			    		pygame.display.flip()
+	    		screen.fill(pygame.Color("black")) # clear the screen
+    		print(audioval)
+    		play(audioval)
+    		drawgame()
     print("Press Control+C to quit...\n")
-    drawgame()
+    try: 
+		drawgame()
+	except KeyboardInterrupt:
+		pygame.quit()
+		controller.remove_listener(listener)
+
 if __name__ == "__main__":
 	main()
