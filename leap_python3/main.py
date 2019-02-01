@@ -2,7 +2,9 @@ import Leap
 import pygame
 import numpy as np
 import time
+import serial
 pygame.init()
+serialArduino = serial.Serial('/dev/ttyACM0', 9600)
 
 BLACK = (0,0,0)
 WHITE = (255,255,255)
@@ -73,8 +75,11 @@ def main():
     def drawgame():
     	t = True
     	start = input("Press s to start.\n")
+    	while serialArduino.inWaiting()==0:
+    		pass
+    	val = serialArduino.readline()
     	# the following statement will be replaced with a start button attached to the pi
-    	if start == "s": # replace with pi gpio button input read
+    	if val == 10: # replace with pi gpio button input read
 	        s = 45 # number of sections
 	        l = 15 # length (mm) of sections
 	        y = 235 # y position
@@ -82,8 +87,9 @@ def main():
 	        audioval = np.array([])
 	        try:
 		        while t == True:
-		        	# if a second button is pressed:
-		        		# t == False to kill the loop
+		        	val = serialArduino.readline()
+		        	if val == 01:
+		        		t == False # to kill the loop
 			        pygame.draw.line(screen, WHITE, [10, 30], [10, 470], 5) # y axis
 			        pygame.draw.line(screen, WHITE, [10, 470], [700, 470], 5) # x axis
 			        for f_region in bands: # frequency ranges
