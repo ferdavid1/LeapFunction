@@ -78,8 +78,9 @@ def main():
     	while serialArduino.inWaiting()==0:
     		pass
     	val = serialArduino.readline()
+    	print(val)
     	# the following statement will be replaced with a start button attached to the pi
-    	if val == 10: # replace with pi gpio button input read
+    	if val == '10': # replace with pi gpio button input read
 	        s = 45 # number of sections
 	        l = 15 # length (mm) of sections
 	        y = 235 # y position
@@ -88,7 +89,7 @@ def main():
 	        try:
 		        while t == True:
 		        	val = serialArduino.readline()
-		        	if val == 01:
+		        	if val == '01':
 		        		t == False # to kill the loop
 			        pygame.draw.line(screen, WHITE, [10, 30], [10, 470], 5) # y axis
 			        pygame.draw.line(screen, WHITE, [10, 470], [700, 470], 5) # x axis
