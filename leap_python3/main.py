@@ -3,7 +3,7 @@ import pygame
 import numpy as np
 import time
 import serial
-import pyaudio
+import sounddevice as sd
 pygame.init()
 serialArduino = serial.Serial('/dev/ttyACM0', 9600)
 
@@ -52,58 +52,59 @@ class SampleListener(Leap.Listener):
         # print(scaled)
 
 def play(audioarray):
-	p = pyaudio.PyAudio()
-	stream = p.open(format=pyaudio.paFloat32,
-                         channels=1,
-                         rate=48000,
-                         output=True,
-                         output_device_index=1
-                         )
-	# Assuming you have a numpy array called samples
-	data = audioarray.astype(np.float32).tostring()
-	stream.write(data)
-	stream.close()
+	audioarray = np.array(audioarray)/40
+	for ind, a in enumerate(audioarray[:-1]):
+		for r in np.arange(a, audioarray[ind + 1], step=0.02):
+			audioarray = np.insert(audioarray, ind + 1, r)
+	print(len(audioarray))
+	sd.play(audioarray, 24000)
+	print("Draw!!")
+	# time.sleep(2)
 
 def main():
     # Create a sample listener and controller
     listener = SampleListener()
     controller = Leap.Controller()
-
+    print("Press the first button to start.\n")
     # Have the sample listener receive events from the controller
     controller.add_listener(listener)
     # Keep this process running until Enter is pressed
     def drawgame():
-    	print("Press the first button to start.\n")
-    	val = serialArduino.readline()[:2].decode("cp437")
-		# print("Value: ", val)
-		audioval = np.array([])
-		if val == '10': # replace with pi gpio button input read
-    		s = 45 # number of sections
-    		l = 15 # length (mm) of sections
-    		y = 235 # y position
-    		bands = np.arange(15, 15+(s*l), step=l)
-    		for x in range(10): # how many times you do this. modulate w a pot
-	    		pygame.draw.line(screen, WHITE, [10, 30], [10, 470], 5) # y axis
-	    		pygame.draw.line(screen, WHITE, [10, 470], [700, 470], 5) # x axis
-	    		for f_region in bands: # frequency ranges
-		    		if f_region+l-5 > scaled[0] > f_region:
-			    		pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, 470-scaled[1]], 5) # changed "y+scaled" to "y-scaled" because y increases in the -y direction for some reason
-			    		pygame.display.flip()
-			    		np.append(audioval, scaled[1]) # these are the raw interpreted audio values we will connect
-			    		time.sleep(0.02)
-			    	else:
-			    		pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, y], 5)
-			    		pygame.display.flip()
-	    		screen.fill(pygame.Color("black")) # clear the screen
-    		print(audioval)
-    		play(audioval)
-    		drawgame()
+    	audioval = []
+    	s = 45 # number of sections
+    	l = 15 # length (mm) of sections
+    	y = 235 # y position
+    	bands = np.arange(15, 15+(s*l), step=l)
+    	for x in range(130): # how many times you do this. modulate w a pot
+	    	pygame.draw.line(screen, WHITE, [10, 30], [10, 470], 5) # y axis
+	    	pygame.draw.line(screen, WHITE, [10, 470], [700, 470], 5) # x axis
+	    	for f_region in bands: # frequency ranges
+	    		if f_region+l-5 > scaled[0] > f_region:
+		    		pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, 470-scaled[1]], 5) # changed "y+scaled" to "y-scaled" because y increases in the -y direction for some reason
+		    		pygame.display.flip()
+		    		audioval.append(int(scaled[1] - 240)) # these are the raw interpreted audio values we will connect
+		    		# print(len(audioval))
+		    		print(int(scaled[1] - 240))
+		    		time.sleep(0.01)
+		    	else:
+		    		pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, y], 5)
+		    		pygame.display.flip()
+    		screen.fill(pygame.Color("black")) # clear the screen
+    	# print(audioval)
+    	play(audioval)
+    	drawgame()
     print("Press Control+C to quit...\n")
-    try: 
-		drawgame()
-	except KeyboardInterrupt:
-		pygame.quit()
-		controller.remove_listener(listener)
+    try:
+    	val = ''
+    	for x in range(10000):
+    		if val != '10':
+	    		val = serialArduino.readline()[:2].decode("cp437")
+    		else:
+    			break
+    	drawgame()
+    except KeyboardInterrupt:
+    	pygame.quit()
+    	controller.remove_listener(listener)
 
 if __name__ == "__main__":
 	main()
