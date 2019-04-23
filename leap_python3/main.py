@@ -10,7 +10,7 @@ serialArduino = serial.Serial('/dev/ttyACM0', 9600)
 BLACK = (0,0,0)
 WHITE = (255,255,255)
 DARKGREEN = (0,122,0)
-# BLUE = (0,0,255)
+BLUE = (0,0,255)
 
 size = (750, 500)
 screen = pygame.display.set_mode(size)
@@ -51,13 +51,13 @@ class SampleListener(Leap.Listener):
         scaled = scale(tip)
         # print(scaled)
 
-def play(audioarray):
+def play(audioarray, ampl_mult):
 	audioarray = np.array(audioarray)/40
 	for ind, a in enumerate(audioarray[:-1]):
 		for r in np.arange(a, audioarray[ind + 1], step=0.02):
 			audioarray = np.insert(audioarray, ind + 1, r)
 	print(len(audioarray))
-	sd.play(audioarray, 24000)
+	sd.play(audioarray, 16000)
 	print("Draw!!")
 	# time.sleep(2)
 
@@ -69,13 +69,13 @@ def main():
     # Have the sample listener receive events from the controller
     controller.add_listener(listener)
     # Keep this process running until Enter is pressed
-    def drawgame():
+    def drawgame(val):
     	audioval = []
     	s = 45 # number of sections
     	l = 15 # length (mm) of sections
     	y = 235 # y position
     	bands = np.arange(15, 15+(s*l), step=l)
-    	for x in range(130): # how many times you do this. modulate w a pot
+    	for x in range(130): # modulate? curr 130
 	    	pygame.draw.line(screen, WHITE, [10, 30], [10, 470], 5) # y axis
 	    	pygame.draw.line(screen, WHITE, [10, 470], [700, 470], 5) # x axis
 	    	for f_region in bands: # frequency ranges
@@ -84,24 +84,35 @@ def main():
 		    		pygame.display.flip()
 		    		audioval.append(int(scaled[1] - 240)) # these are the raw interpreted audio values we will connect
 		    		# print(len(audioval))
-		    		print(int(scaled[1] - 240))
+		    		# print(int(scaled[1]))
 		    		time.sleep(0.01)
 		    	else:
 		    		pygame.draw.line(screen, DARKGREEN, [f_region, y], [f_region+l - 5, y], 5)
 		    		pygame.display.flip()
+    		pointlist = list(zip([x+10 for x in bands], [(x+230) for x in audioval]))
     		screen.fill(pygame.Color("black")) # clear the screen
-    	# print(audioval)
-    	play(audioval)
-    	drawgame()
+    	if len(audioval) > 1:
+    		# print(pointlist)
+    		for y in range(5000):
+		    	pygame.draw.line(screen, WHITE, [10, 30], [10, 470], 5) # y axis
+		    	pygame.draw.line(screen, WHITE, [10, 470], [700, 470], 5) # x axis
+    			pygame.draw.lines(screen, WHITE, False, pointlist, 5)
+    			pygame.display.flip()
+    	val = serialArduino.readline()[:2].decode("cp437")
+    	print(val)
+    	while val.startswith('10'):
+	    	play(audioval)
+	    	val = serialArduino.readline()[:2].decode("cp437")
+    	drawgame(val)
     print("Press Control+C to quit...\n")
     try:
     	val = ''
     	for x in range(10000):
-    		if val != '10':
+    		if not val.startswith('10'):
 	    		val = serialArduino.readline()[:2].decode("cp437")
     		else:
     			break
-    	drawgame()
+    	drawgame(val)
     except KeyboardInterrupt:
     	pygame.quit()
     	controller.remove_listener(listener)
