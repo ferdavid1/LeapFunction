@@ -57,7 +57,7 @@ def play(audioarray, ampl_mult):
 		for r in np.arange(a, audioarray[ind + 1], step=0.02):
 			audioarray = np.insert(audioarray, ind + 1, r)
 	print(len(audioarray))
-	sd.play(audioarray, 16000)
+	sd.play(audioarray, 16000*ampl_mult)
 	print("Draw!!")
 	# time.sleep(2)
 
@@ -98,11 +98,16 @@ def main():
 		    	pygame.draw.line(screen, WHITE, [10, 470], [700, 470], 5) # x axis
     			pygame.draw.lines(screen, WHITE, False, pointlist, 5)
     			pygame.display.flip()
-    	val = serialArduino.readline()[:2].decode("cp437")
-    	print(val)
+    	val1 = serialArduino.readline().decode("cp437")
+    	print(val1)
+    	ampl_mult = val[val[","]:val[":"]]
+    	print(ampl_mult)
+    	interval_mult = val[val[":"]:]
+    	print(interval_mult)
     	while val.startswith('10'):
-	    	play(audioval)
-	    	val = serialArduino.readline()[:2].decode("cp437")
+	    	play(audioval, ampl_mult)
+	    	time.sleep(0.01*interval_mult)
+	    	val = serialArduino.readline().decode("cp437")
     	drawgame(val)
     print("Press Control+C to quit...\n")
     try:

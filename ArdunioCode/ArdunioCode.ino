@@ -19,7 +19,9 @@ int amp = analogRead(pot2);
 int interval = analogRead(pot1);
 Serial.print(read1);
 Serial.print(read2);
+Serial.print(",");
 Serial.print(amp);
+Serial.print(":");
 Serial.print(interval);
 Serial.println();
 }
