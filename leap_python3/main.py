@@ -71,7 +71,7 @@ def main():
     # Create a sample listener and controller
     listener = SampleListener()
     controller = Leap.Controller()
-    print("Press the first button to start.\n")
+    print("Get ready to Draw in 5 seconds!.\n")
     # Have the sample listener receive events from the controller
     controller.add_listener(listener)
     # Keep this process running until Enter is pressed
@@ -108,7 +108,7 @@ def main():
                 pygame.display.flip()
         #break
         val = serialArduino.readline().decode("cp437")
-        print(val, "1")
+        # print(val, "1")
         while True:
             val = serialArduino.readline().decode("cp437")
             if ":" not in val or "," not in val:
@@ -124,7 +124,7 @@ def main():
                         pass 
                     else:
                         try:   
-                            print(val, "2")
+                            # print(val, "2")
                             ampl_mult = val[val.index(",")+1:val.index(":")]
                             # interval_mult = val[val.index(":")+1:]
                             play(audioval, rate_scale(int(ampl_mult)))
@@ -134,12 +134,8 @@ def main():
                             pass
     print("Press Control+C to quit...\n")
     try:
-        val = ''
-        for x in range(10000):
-            if not val.startswith('10'):
-                val = serialArduino.readline()[:2].decode("cp437")
-            else:
-                break
+        time.sleep(5)
+        val = serialArduino.readline().decode("cp437")
         drawgame(val)
     except KeyboardInterrupt:
         pygame.quit()
