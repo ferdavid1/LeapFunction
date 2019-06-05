@@ -24,4 +24,5 @@ Serial.print(amp);
 Serial.print(":");
 Serial.print(interval);
 Serial.println();
+delay(interval*1.5);
 }

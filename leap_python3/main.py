@@ -52,38 +52,20 @@ class SampleListener(Leap.Listener):
         scaled = scale(tip)
         # print(scaled)
 
-def rate_scale(ampl_mult):
-    if 0 < ampl_mult <= 250:
-        return 1
-    elif 250 < ampl_mult <= 500:
-        return 2
-    elif 500 < ampl_mult <= 750:
-        return 3
-    elif 750 < ampl_mult <= 1000:
-        return 4
-    elif ampl_mult > 1000:
-        return 5
-    else:
-        return 1
-
-def int_scale(interval_mult):
-    range_ = np.arange(0.05, 0.2, step=0.01)
-    assert len(range_) == 15
-    val = interval_mult / 1300    
-    scaled = 0.05 + (val*.15)
-    print(scaled)
+def rate_scale(ampl_mult): # modulation scaling for sample rate
+    val = ampl_mult / 1300
+    scaled = 5 + (val*20)
     return scaled
 
-def play(audioarray, ampl_mult, interval_mult):
-    audioarray = np.array(audioarray)/40
+def play(audioarray, ampl_mult):
+    const = 5*ampl_mult
+    audioarray = np.array(audioarray)/const
     # print(len(audioarray))
     for ind, a in enumerate(audioarray[:-1]):
-        for r in np.arange(a, audioarray[ind + 1], step=interval_mult): # 0.02
+        for r in np.arange(a, audioarray[ind + 1], step=.05):
             audioarray = np.insert(audioarray, ind + 1, r)
     # print(len(audioarray))
-    sd.play(audioarray, 1000*ampl_mult)
-    print("Draw!!")
-    # time.sleep(2)
+    sd.play(audioarray, 4000)
 
 def main():
     # Create a sample listener and controller
@@ -94,6 +76,7 @@ def main():
     controller.add_listener(listener)
     # Keep this process running until Enter is pressed
     def drawgame(val):
+        print("Draw!!\n")
         audioval = []
         s = 45 # number of sections
         l = 15 # length (mm) of sections
@@ -139,13 +122,16 @@ def main():
                 else:
                     if val.count(",") > 1:
                         pass 
-                    else:   
-                        print(val, "2")
-                        ampl_mult = val[val.index(",")+1:val.index(":")]
-                        interval_mult = val[val.index(":")+1:]
-                        play(audioval, rate_scale(int(ampl_mult)), int_scale(int(interval_mult)))
-                        flip = False
-                        # time.sleep(0.003*int(interval_mult))
+                    else:
+                        try:   
+                            print(val, "2")
+                            ampl_mult = val[val.index(",")+1:val.index(":")]
+                            # interval_mult = val[val.index(":")+1:]
+                            play(audioval, rate_scale(int(ampl_mult)))
+                            flip = False
+                            # time.sleep(0.003*int(interval_mult))
+                        except ValueError:
+                            pass
     print("Press Control+C to quit...\n")
     try:
         val = ''
