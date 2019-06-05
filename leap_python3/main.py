@@ -71,7 +71,7 @@ def main():
     # Create a sample listener and controller
     listener = SampleListener()
     controller = Leap.Controller()
-    print("Get ready to Draw in 5 seconds!.\n")
+    print("Get ready to Draw in 3 seconds!.\n")
     # Have the sample listener receive events from the controller
     controller.add_listener(listener)
     # Keep this process running until Enter is pressed
@@ -134,7 +134,7 @@ def main():
                             pass
     print("Press Control+C to quit...\n")
     try:
-        time.sleep(5)
+        time.sleep(3)
         val = serialArduino.readline().decode("cp437")
         drawgame(val)
     except KeyboardInterrupt:
