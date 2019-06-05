@@ -66,14 +66,21 @@ def rate_scale(ampl_mult):
     else:
         return 1
 
+def int_scale(interval_mult):
+    range_ = np.arange(0.05, 0.2, step=0.01)
+    assert len(range_) == 15
+    val = interval_mult / 1300    
+    scaled = 0.05 + (val*.15)
+    print(scaled)
+    return scaled
 
-def play(audioarray, ampl_mult):
+def play(audioarray, ampl_mult, interval_mult):
     audioarray = np.array(audioarray)/40
-    print(len(audioarray))
+    # print(len(audioarray))
     for ind, a in enumerate(audioarray[:-1]):
-        for r in np.arange(a, audioarray[ind + 1], step=0.2): # 0.02
+        for r in np.arange(a, audioarray[ind + 1], step=interval_mult): # 0.02
             audioarray = np.insert(audioarray, ind + 1, r)
-    print(len(audioarray))
+    # print(len(audioarray))
     sd.play(audioarray, 1000*ampl_mult)
     print("Draw!!")
     # time.sleep(2)
@@ -136,7 +143,7 @@ def main():
                         print(val, "2")
                         ampl_mult = val[val.index(",")+1:val.index(":")]
                         interval_mult = val[val.index(":")+1:]
-                        play(audioval, rate_scale(int(ampl_mult)))
+                        play(audioval, rate_scale(int(ampl_mult)), int_scale(int(interval_mult)))
                         flip = False
                         # time.sleep(0.003*int(interval_mult))
     print("Press Control+C to quit...\n")
